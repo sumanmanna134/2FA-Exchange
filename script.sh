@@ -30,9 +30,9 @@ run_command(){
 }
 clear
 # Introduction
-echo 
-echo "Welcome to the Interactive Menu Script"
-echo "This script allows you to perform various actions using kubectl commands."
+echo s
+echo "Welcome 2FA-EXP-ORCHESTRATION"
+echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
