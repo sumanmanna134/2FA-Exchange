@@ -9,7 +9,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: process.env.POSTGRES_DB || 'exchangedb',
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
   logging: true,
-  synchronize: true,
+  synchronize: false,
 };
 
 const dataSource = new DataSource(dataSourceOptions);

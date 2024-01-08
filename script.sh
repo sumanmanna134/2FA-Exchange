@@ -75,6 +75,10 @@ select option in "${options[@]}"; do
     case $REPLY in
         1)
             run_command "docker build -t $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME ." "Docker Image $DOCKER_BUILD_IMAGE_NAME build successfully"
+            sleep 2
+            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository"
+            sleep 5
+            run_command "docker-compose up" "deployed"
             ;;
         2)
             run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository"

@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { SignupCredentialsDto } from '../dto/signup-credentials.dto';
 import { CommonPromiseInterface } from '../../utils/interfaces/common.type';
@@ -14,6 +14,9 @@ import { JwtPayload } from '../../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
+  constructor(private dataSource: DataSource) {
+    super(User, dataSource.createEntityManager());
+  }
   async signup(
     signupCredentialsDto: SignupCredentialsDto,
   ): Promise<CommonPromiseInterface> {

@@ -11,18 +11,15 @@ import { JwtService } from '@nestjs/jwt';
 import * as config from 'config';
 import { User } from '../entity/user.entity';
 import * as bcrypt from 'bcrypt';
-import { AuthenticationAbstractOptions } from './authentication.abstract';
 
 const dbConfig = config.get('jwt');
 @Injectable()
-export class AuthService extends AuthenticationAbstractOptions {
+export class AuthService {
   constructor(
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
     private jwtService: JwtService,
-  ) {
-    super();
-  }
+  ) {}
 
   async getNewAccessAndRefreshToken(payload: JwtPayload) {
     const refreshToken = await this.getRefreshToken(payload);
