@@ -76,6 +76,12 @@ $ ./script.sh
 
 ![Alt text](screenshots/script-menu.png)
 
+## Swagger
+
+```
+http://localhost:3000/docs
+```
+
 ## Test
 
 ```bash
