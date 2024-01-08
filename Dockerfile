@@ -1,17 +1,18 @@
-# Image source
-FROM node:10-alpine
+FROM node:16
 
-# Docker working directory
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-# Copying file into APP directory of docker
-COPY ./package.json ./package-lock.json /app/
+# Install app dependencies
+COPY package*.json ./
 
-# Then install the NPM module
 RUN npm install
 
-# Copy current directory to APP folder
-COPY . /app/
+# Bundle app source
+COPY . .
+
+RUN npm run build
 
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+
+CMD [ "npm", "run" , "start:dev" ]

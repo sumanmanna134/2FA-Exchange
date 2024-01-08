@@ -28,6 +28,37 @@ run_command(){
         exit 1
     fi
 }
+
+confirm_action() {
+    local action_message=$1
+    local confirm_function=$2
+    local confirm_function_params="${@:3}"  # Get all additional parameters starting from the 3rd position
+
+    read -p "Do you want to $action_message? (y/N): " confirmation
+
+    if [[ "$confirmation" =~ ^[Yy]$ ]]; then
+        echo "Confirmed. Proceeding with $action_message..."
+        $confirm_function $confirm_function_params
+    else
+        echo "Operation canceled."
+    fi
+}
+
+docker_compose(){
+    local command_type=$1
+    echo "Excuting Docker-compose api... ";
+    docker-compose "$command_type"
+}
+
+call_api(){
+    local api_url=$1
+
+    #make a GET request
+    local response=$(curl -X GET --header "Accept: */*" $api_url)
+    echo "Response from server"
+    echo $response
+}
+
 clear
 # Introduction
 echo s
@@ -36,7 +67,7 @@ echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
-options=("Build Docker Image" "Push to Docker Hub" "Get All Image Versions" "Create Server (PGADMIN4)" "Quit")
+options=("Build Docker Image" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Quit")
 echo
 PS3="> "
 echo
@@ -58,9 +89,14 @@ select option in "${options[@]}"; do
             fi
             ;;
 
-        4) run_command "docker-compose run nestjs npm run typeorm:generate exchange-migration" "created server in pgadmin4 before the migration"
-           ;;
-        5)
+        4) confirm_action "Server up.." docker_compose "up"
+            ;;
+        5) confirm_action "Rollback proceeding" docker_compose "down"
+            ;;
+
+        6) call_api "http://localhost:3000/ping"
+            ;;
+        7)
             echo "Quitting..."
             break
             ;;
