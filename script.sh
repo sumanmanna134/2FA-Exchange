@@ -67,7 +67,7 @@ echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
-options=("Build Docker Image" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Quit")
+options=("Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Quit")
 echo
 PS3="> "
 echo
