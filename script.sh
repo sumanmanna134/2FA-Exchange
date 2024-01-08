@@ -54,9 +54,102 @@ call_api(){
     local api_url=$1
 
     #make a GET request
-    local response=$(curl -X GET --header "Accept: */*" $api_url)
+    local response=$(curl -X 'POST' \
+  'http://localhost:3000/auth/signin' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "username": "suman.manna134",
+  "password": "Password123!"
+}')
     echo "Response from server"
     echo $response
+}
+
+
+login_api_call(){
+
+    if [[ -z "$FA_SERVER" ]]; then
+        read -p "Server: " SERVER
+        export FA_SERVER="$SERVER"
+    fi
+
+    if [[ -z "$FA_USERNAME" ]]; then
+        read -p "username: " USERNAME
+        export FA_USERNAME="$USERNAME"
+    fi
+
+    if [[ -z "$FA_PASSWORD" ]]; then
+        read -p "password: " PASSWORD
+        export FA_PASSWORD="$PASSWORD"
+    fi
+    
+    
+    echo
+    local JSON_DATA="{\"username\": \"$FA_USERNAME\", \"password\": \"$FA_PASSWORD\"}"
+    response_file=$(mktemp -t login_api_response)
+    curl -s -o "$response_file" -X POST "$FA_SERVER/auth/signin" -H "Content-Type: application/json" -d "$JSON_DATA"
+    if [ $? -eq 0 ]; then
+        # Extract access_token using grep and awk
+        local access_token=$(grep -o '"accessToken": *"[^"]*"' "$response_file" | awk -F '"' '{print $4}')
+
+        if [ -n "$access_token" ]; then
+            echo "Access Token: $access_token"
+
+            # Additional processing or usage of the access_token can be done here
+        else
+            echo "Failed to extract access_token from the response."
+            # Print the response body for debugging
+            cat "$response_file"
+        fi
+    else
+        echo "Error making API call."
+    fi
+
+    rm -f "$response_file"
+}
+
+get_refresh_token(){
+    if [[ -z "$FA_SERVER" && -z "$FA_USERNAME" && -z "$FA_PASSWORD" ]]; then
+        echo "UnAuthorized Access!, Please configure before"
+    else
+        local JSON_DATA="{\"username\": \"$FA_USERNAME\", \"password\": \"$FA_PASSWORD\"}"
+        response_file=$(mktemp -t login_api_response)
+        curl -s -o "$response_file" -X POST "$FA_SERVER/auth/signin" -H "Content-Type: application/json" -d "$JSON_DATA"
+        if [ $? -eq 0 ]; then
+        # Extract access_token using grep and awk
+            local refresh_token=$(grep -o '"refreshToken": *"[^"]*"' "$response_file" | awk -F '"' '{print $4}')
+
+            if [ -n "$refresh_token" ]; then
+                echo "Refresh Token: $refresh_token"
+
+            # Additional processing or usage of the access_token can be done here
+            else
+                echo "Failed to extract access_token from the response."
+            # Print the response body for debugging
+                cat "$response_file"
+            fi
+        else
+            echo "Error making API call."
+        fi
+        
+    fi
+    rm -f "$response_file"
+}
+
+configure(){
+    read -p "Server: " SERVER
+    export FA_SERVER="$SERVER"
+
+    read -p "username: " USERNAME
+    export FA_USERNAME="$USERNAME"
+
+    read -p "password: " PASSWORD
+    export FA_PASSWORD="$PASSWORD"
+
+    echo "Configuring..."
+    sleep 5
+    echo "Congratulations! FA service configured Successfully."
 }
 
 clear
@@ -67,7 +160,7 @@ echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
-options=("Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Quit")
+options=("Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Configure" "Access Token" "Refresh Token" "Quit")
 echo
 PS3="> "
 echo
@@ -97,10 +190,21 @@ select option in "${options[@]}"; do
             ;;
         5) confirm_action "Rollback proceeding" docker_compose "down"
             ;;
+ 
 
         6) call_api "http://localhost:3000/ping"
             ;;
-        7)
+
+        7) configure
+            ;;
+
+
+        8) login_api_call
+            ;;
+
+        9) get_refresh_token
+            ;;
+        10)
             echo "Quitting..."
             break
             ;;
