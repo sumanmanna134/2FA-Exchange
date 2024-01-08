@@ -32,18 +32,49 @@
 $ npm install
 ```
 
-## Running the app
+Create .env file
+
+## Env Create
 
 ```bash
-# development
-$ npm run start
+DB_TYPE=
+POSTGRES_HOST=
+POSTGRES_PORT=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DB_NAME=
+POSTGRES_USER=
+DB_USERNAME=
+DB_PASSWORD=
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_DEFAULT_PASSWORD=
+PGADMIN_LISTEN_PORT=
+APP_PORT=3000
+JWT_ACCESS_TOKEN_SECRET=
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=
+JWT_REFRESH_TOKEN_SECRET=anyRefreshKey
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=28800
+TWO_FACTOR_AUTHENTICATION_APP_NAME=exchange-app
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+DOCKER_BUILD_IMAGE_NAME=2fa-exchange
+DOCKER_REPOSITORY=
 ```
+
+### Run the Script
+
+## open terminal
+
+```bash
+$ chmod +x script.sh
+```
+
+## Running the services
+
+```bash
+$ ./script.sh
+```
+
+![Alt text](screenshots/script-menu.png)
 
 ## Test
 
