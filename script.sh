@@ -50,20 +50,50 @@ docker_compose(){
     docker-compose "$command_type"
 }
 
-call_api(){
-    local api_url=$1
+ping_server(){
+    if is_os_type "Linux"; then
+        response_file=$(mktemp -t server_ping_response.XXXXXX)
+    elif is_os_type "Darwin"; then
+        response_file=$(mktemp -t server_ping_response)
+    fi
+    local_ip=$(get_host)
+    curl -s -o "$response_file" "$local_ip":"$APP_PORT"/ping
+    cat "$response_file"
+    rm -f "$response_file" 
+}
 
-    #make a GET request
-    local response=$(curl -X 'POST' \
-  'http://localhost:3000/auth/signin' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "username": "suman.manna134",
-  "password": "Password123!"
-}')
-    echo "Response from server"
-    echo $response
+get_swagger_url(){
+    local_ip=$(get_host)
+    echo -e "Swagger docs: http://"$local_ip":"$APP_PORT"/docs"
+}
+
+isConfigured(){
+    if [[ -z "$FA_SERVER" && -z "$FA_USERNAME" && -z "$FA_PASSWORD" ]]; then
+        echo "UnAuthorized Access!, Please configure before"
+    else
+        echo "Service calling.."
+    fi
+}
+
+get_host(){
+    local_ip=$(ifconfig | grep 'inet ' | awk '{print $2}' | head -n 1)
+    echo "$local_ip"
+}
+
+get_os_type() {
+    uname -s
+}
+
+# Function to check if the OS type matches a specific value
+is_os_type() {
+    local target_os_type="$1"
+    local current_os_type=$(get_os_type)
+
+    if [ "$current_os_type" == "$target_os_type" ]; then
+        return 0  # Return success (true)
+    else
+        return 1  # Return failure (false)
+    fi
 }
 
 
@@ -87,13 +117,20 @@ login_api_call(){
     
     echo
     local JSON_DATA="{\"username\": \"$FA_USERNAME\", \"password\": \"$FA_PASSWORD\"}"
-    response_file=$(mktemp -t login_api_response)
+    if is_os_type "Linux"; then
+        response_file=$(mktemp -t server_login_response.XXXXXX)
+    elif is_os_type "Darwin"; then
+        response_file=$(mktemp -t server_login_response)
+    fi
     curl -s -o "$response_file" -X POST "$FA_SERVER/auth/signin" -H "Content-Type: application/json" -d "$JSON_DATA"
     if [ $? -eq 0 ]; then
         # Extract access_token using grep and awk
         local access_token=$(grep -o '"accessToken": *"[^"]*"' "$response_file" | awk -F '"' '{print $4}')
 
         if [ -n "$access_token" ]; then
+            echo 2
+            echo "Congratulations! FA service configured Successfully 🤩."
+            echo
             echo "Access Token: $access_token"
 
             # Additional processing or usage of the access_token can be done here
@@ -111,10 +148,14 @@ login_api_call(){
 
 get_refresh_token(){
     if [[ -z "$FA_SERVER" && -z "$FA_USERNAME" && -z "$FA_PASSWORD" ]]; then
-        echo "UnAuthorized Access!, Please configure before"
+        echo "UnAuthorized Access! 😐, Please configure before 🧐"
     else
         local JSON_DATA="{\"username\": \"$FA_USERNAME\", \"password\": \"$FA_PASSWORD\"}"
-        response_file=$(mktemp -t login_api_response)
+        if is_os_type "Linux"; then
+            response_file=$(mktemp -t server_refresh_response.XXXXXX)
+        elif is_os_type "Darwin"; then
+            response_file=$(mktemp -t server_refresh_response)
+        fi
         curl -s -o "$response_file" -X POST "$FA_SERVER/auth/signin" -H "Content-Type: application/json" -d "$JSON_DATA"
         if [ $? -eq 0 ]; then
         # Extract access_token using grep and awk
@@ -137,46 +178,77 @@ get_refresh_token(){
     rm -f "$response_file"
 }
 
-configure(){
-    read -p "Server: " SERVER
-    export FA_SERVER="$SERVER"
+install_docker_macos() {
+    echo "Installing Docker Desktop on macOS..."
+    brew install --cask docker
+}
 
-    read -p "username: " USERNAME
-    export FA_USERNAME="$USERNAME"
+install_docker_linux() {
+    echo "Installing Docker on Linux..."
+    sudo apt-get update
+    sudo apt-get install docker.io -y
+    sudo systemctl start docker
+    sudo docker run hello-world
+    sudo systemctl enable docker
+    sudo usermod -a -G docker $(whoami)
+    newgrp docker
+    echo "Docker installed and started. ✅"
+}
+configure_docker_compose(){
+    sudo curl -L "https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-$(uname -s)-$(uname -m)"  -o /usr/local/bin/docker-compose
+    sudo mv /usr/local/bin/docker-compose /usr/bin/docker-compose
+    sudo chmod +x /usr/bin/docker-compose
+    echo "Docker-compose installed and ready to use 🚀"
+}
 
-    read -p "password: " PASSWORD
-    export FA_PASSWORD="$PASSWORD"
-
-    echo "Configuring..."
-    sleep 5
-    echo "Congratulations! FA service configured Successfully."
+configure_docker(){
+if command -v docker &> /dev/null; then
+    echo "Docker is already installed."
+else
+    # Detect the operating system
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        install_docker_macos
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        install_docker_linux
+    else
+        echo "Unsupported operating system."
+        exit 1
+    fi
+fi
+    
 }
 
 clear
 # Introduction
-echo s
-echo "Welcome 2FA-EXP-ORCHESTRATION"
+echo 
+echo "Welcome 2FA-EXP-ORCHESTRATION 🚀"
 echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
-options=("Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Configure" "Access Token" "Refresh Token" "Quit")
+options=("Install Docker" "Docker-compose Configure" "Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Fa Login" "Refresh Token" "swagger docs" "Quit")
 echo
 PS3="> "
 echo
 select option in "${options[@]}"; do
     case $REPLY in
-        1)
-            run_command "docker build -t $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME ." "Docker Image $DOCKER_BUILD_IMAGE_NAME build successfully"
+        1) configure_docker
+           docker_status=$(docker info &> /dev/null && echo "running" || echo "not running")
+           echo "Docker status: $docker_status"
+            ;;
+        2) configure_docker_compose
+            ;;
+        3)
+            run_command "docker build -t $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME ." "Docker Image $DOCKER_BUILD_IMAGE_NAME build successfully ✅"
             sleep 2
-            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository"
+            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository 🐳"
             sleep 5
             run_command "docker-compose up" "deployed"
             ;;
-        2)
-            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository"
+        4)
+            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository 🐳"
             ;;
-        3)
+        5)
             docker_images_output=$(docker images | grep $DOCKER_BUILD_IMAGE_NAME)
             if [ -n "$docker_images_output" ]; then
                 echo "Matching Docker images:"
@@ -186,25 +258,24 @@ select option in "${options[@]}"; do
             fi
             ;;
 
-        4) confirm_action "Server up.." docker_compose "up"
+        6) docker-compose up -d
+           docker-compose exec --user root pgadmin sh -c 'chmod 0777 /var/lib/pgadmin -R'
             ;;
-        5) confirm_action "Rollback proceeding" docker_compose "down"
-            ;;
- 
-
-        6) call_api "http://localhost:3000/ping"
+        7) confirm_action "Rollback proceeding 🛠️" docker_compose "down -v"
             ;;
 
-        7) configure
+        8) ping_server
             ;;
 
-
-        8) login_api_call
+        9) login_api_call
             ;;
 
-        9) get_refresh_token
+        10) get_refresh_token
             ;;
-        10)
+
+        11) get_swagger_url
+            ;;
+        12)
             echo "Quitting..."
             break
             ;;
