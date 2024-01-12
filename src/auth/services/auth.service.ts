@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { UserRepository } from '../repository/user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignupCredentialsDto } from '../dto/signup-credentials.dto';
-import { CommonPromiseInterface } from '../../utils/interfaces/common.type';
+import { SignUpResponseDto } from '../../utils/interfaces/common.type';
 import { SignInCredentialsDto } from '../dto/signin-credentials.dto';
 import { SignInPayLoadInterFaceOptions } from '../../interfaces/signIn.payload.interface';
 import { JwtPayload } from '../../interfaces/jwt-payload.interface';
@@ -32,7 +32,7 @@ export class AuthService {
 
   async signup(
     signUpCredentialDto: SignupCredentialsDto,
-  ): Promise<CommonPromiseInterface> {
+  ): Promise<SignUpResponseDto> {
     return this.userRepository.signup(signUpCredentialDto);
   }
 

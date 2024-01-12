@@ -226,7 +226,7 @@ echo "This script allows you to perform various actions to orchestration."
 echo "Please select an option from the menu below:"
 # Menu options
 echo
-options=("Install Docker" "Docker-compose Configure" "Build and Deploy to Docker" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Fa Login" "Refresh Token" "swagger docs" "Quit")
+options=("Install Docker" "Docker-compose Configure" "Build and Deploy to Docker" "Build Docker Image and Push to Hub" "Push to Docker Hub" "Get All Image Versions" "Deploy" "Rollout" "ping to server" "Fa Login" "Refresh Token" "swagger docs" "DB Migration" "Migration run" "Quit")
 echo
 PS3="> "
 echo
@@ -245,10 +245,14 @@ select option in "${options[@]}"; do
             sleep 5
             run_command "docker-compose up" "deployed"
             ;;
-        4)
+        4) run_command "docker build -t $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME ." "Docker Image $DOCKER_BUILD_IMAGE_NAME build successfully ✅"
+            sleep 2
             run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository 🐳"
             ;;
         5)
+            run_command "docker push $DOCKER_REPOSITORY/$DOCKER_BUILD_IMAGE_NAME" "$DOCKER_BUILD_IMAGE_NAME is pushed successfully on the $DOCKER_REPOSITORY repository 🐳"
+            ;;
+        6)
             docker_images_output=$(docker images | grep $DOCKER_BUILD_IMAGE_NAME)
             if [ -n "$docker_images_output" ]; then
                 echo "Matching Docker images:"
@@ -258,24 +262,29 @@ select option in "${options[@]}"; do
             fi
             ;;
 
-        6) docker-compose up -d
+        7) docker-compose up -d
            docker-compose exec --user root pgadmin sh -c 'chmod 0777 /var/lib/pgadmin -R'
             ;;
-        7) confirm_action "Rollback proceeding 🛠️" docker_compose "down -v"
+        8) confirm_action "Rollback proceeding 🛠️" docker_compose "down -v"
             ;;
 
-        8) ping_server
+        9) ping_server
             ;;
 
-        9) login_api_call
+        10) login_api_call
             ;;
 
-        10) get_refresh_token
+        11) get_refresh_token
             ;;
 
-        11) get_swagger_url
+        12) get_swagger_url
             ;;
-        12)
+        13) run_command "docker-compose run nestjs npm run migration:generate src/migration/migration_1" "migration generated 🚀"
+            ;;
+        14) run_command "docker-compose run nestjs npm run migration:run" "Migration running successfully 🚀"
+            ;;
+
+        15)
             echo "Quitting..."
             break
             ;;

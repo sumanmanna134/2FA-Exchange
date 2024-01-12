@@ -16,6 +16,10 @@ import { Exclude } from 'class-transformer';
 @Entity()
 @Unique(['username'])
 export class User extends BaseEntity {
+  constructor() {
+    // Call the super() constructor from BaseEntity
+    super();
+  }
   @PrimaryGeneratedColumn()
   id: number;
 

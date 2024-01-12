@@ -6,7 +6,7 @@ import {
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { SignupCredentialsDto } from '../dto/signup-credentials.dto';
-import { CommonPromiseInterface } from '../../utils/interfaces/common.type';
+import { SignUpResponseDto } from '../../utils/interfaces/common.type';
 import * as bcrypt from 'bcrypt';
 import { UserInfo } from '../../user/entity/user-info.entity';
 import { SignInCredentialsDto } from '../dto/signin-credentials.dto';
@@ -19,7 +19,7 @@ export class UserRepository extends Repository<User> {
   }
   async signup(
     signupCredentialsDto: SignupCredentialsDto,
-  ): Promise<CommonPromiseInterface> {
+  ): Promise<SignUpResponseDto> {
     const user = await this.createUser(signupCredentialsDto);
     try {
       await this.saveUserToDatabase(user);

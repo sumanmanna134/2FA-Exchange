@@ -2,6 +2,10 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UserInfo extends BaseEntity {
+  constructor() {
+    // Call the super() constructor from BaseEntity
+    super();
+  }
   @PrimaryGeneratedColumn()
   id: number;
 

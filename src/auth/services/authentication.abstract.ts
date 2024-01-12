@@ -1,6 +1,6 @@
 import { JwtPayload } from '../../interfaces/jwt-payload.interface';
 import { SignInPayLoadInterFaceOptions } from '../../interfaces/signIn.payload.interface';
-import { CommonPromiseInterface } from '../../utils/interfaces/common.type';
+import { SignUpResponseDto } from '../../utils/interfaces/common.type';
 import { SignInCredentialsDto } from '../dto/signin-credentials.dto';
 import { SignupCredentialsDto } from '../dto/signup-credentials.dto';
 import { User } from '../entity/user.entity';
@@ -10,7 +10,7 @@ export abstract class AuthenticationAbstractOptions {
 
   abstract signup(
     signUpCredentialDto: SignupCredentialsDto,
-  ): Promise<CommonPromiseInterface>;
+  ): Promise<SignUpResponseDto>;
 
   abstract signIn(
     signInCredentialDto: SignInCredentialsDto,

@@ -10,6 +10,10 @@ import { User } from '../../auth/entity/user.entity';
 
 @Entity()
 export class Exchange extends BaseEntity {
+  constructor() {
+    // Call the super() constructor from BaseEntity
+    super();
+  }
   @PrimaryGeneratedColumn()
   id: number;
 

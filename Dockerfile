@@ -1,17 +1,17 @@
+# Image source
 FROM node:16
 
-# Create app directory
-WORKDIR /usr/src/app
+# Docker working directory
+WORKDIR /app
 
-# Install app dependencies
-COPY package*.json ./
+# Copying file into APP directory of docker
+COPY ./package.json  /app/
 
-RUN npm install --no-package-lock --verbose
+# Then install the NPM module
+RUN npm install --force
 
-# Bundle app source
-COPY . .
-
+# Copy current directory to APP folder
+COPY . /app/
 
 EXPOSE 3000
-
-CMD [ "npm", "run" , "start:dev" ]
+CMD ["npm", "run", "start:dev"]
