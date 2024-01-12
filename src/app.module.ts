@@ -7,9 +7,11 @@ import { ExchangeModule } from './exchange/exchange.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import typeOrmConfig, { dataSourceOptions } from './typeorm.config';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
     UserModule,

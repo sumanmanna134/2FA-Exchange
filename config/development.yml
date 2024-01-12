@@ -6,4 +6,4 @@ db:
 jwt:
   secret: 'anyKey'
   refreshSecret: 'noKey'
-  twoFactorAppName: '2fa-exchange'
+  twoFactorAppName: 'exchange-app'

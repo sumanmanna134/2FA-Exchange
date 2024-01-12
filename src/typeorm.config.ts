@@ -1,7 +1,9 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
+import * as config from 'config';
+const dbConfig = config.get('jwt');
 export const dataSourceOptions: DataSourceOptions = {
-  type: 'postgres' || 'postgres',
-  host: process.env.POSTGRES_HOST || 'postgres-db',
+  type: 'postgres' || dbConfig.type,
+  host: process.env.POSTGRES_HOST || dbConfig.host,
   port: +process.env.POSTGRES_PORT || 5432,
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres!',

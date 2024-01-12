@@ -16,6 +16,7 @@ import { UserInfoData } from '../interface/user-info.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UserInfoDto } from '../dto/user-info.dto';
+import { JwtTwoFactorGuard } from '../../auth/guards/jwt-two-factor.guard';
 const {
   editFileName,
   imageFileFilter,
@@ -23,7 +24,7 @@ const {
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtAuthenticationGuard)
+@UseGuards(JwtTwoFactorGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 
