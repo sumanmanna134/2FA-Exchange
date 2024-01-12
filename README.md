@@ -82,6 +82,14 @@ $ ./script.sh
 http://localhost:3000/docs
 ```
 
+## 2Factor Authentication Endpoints
+
+1. `/2fa/generate-qr`: endpoint likely represents an API endpoint in a web application responsible for generating a QR code to enable two-factor authentication (2FA) for a user.
+2. `/2fa/activate`: endpoint is a route in a web application that facilitates the activation process for two-factor authentication (2FA). This endpoint typically handles HTTP POST requests and expects the user to provide necessary information, such as an authentication code, to enable 2FA for their account.
+3. `/2fa/authenticate`: endpoint is typically used in the context of two-factor authentication (2FA) within a web application. This endpoint is designed to handle the authentication process when a user attempts to verify their identity using two factors: something they know (e.g., a password) and something they have (e.g., a mobile device).
+
+![Alt text](screenshots/2fa-qr-gen.png)
+
 ## Test
 
 ```bash
